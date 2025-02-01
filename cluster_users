@@ -1,0 +1,36 @@
+# Find the optimal number of clusters using the Elbow method
+inertia = []
+k_values = range(1, 11)
+for k in k_values:
+    kmeans = KMeans(n_clusters=k, random_state=42, n_init=10)
+    kmeans.fit(user_category_scaled)
+    inertia.append(kmeans.inertia_)
+
+# Plot the Elbow graph
+plt.figure(figsize=(8, 5))
+plt.plot(k_values, inertia, marker='o', linestyle='--')
+plt.xlabel('Number of Clusters')
+plt.ylabel('Inertia')
+plt.title('Elbow Method for Optimal K')
+plt.show()
+
+# Determine the optimal K (choosing elbow point manually or using heuristic)
+k_optimal = 6  # OR You can manually inspect the plot and adjust this value
+
+# Apply K-Means clustering
+kmeans = KMeans(n_clusters=k_optimal, random_state=42, n_init=10)
+kmeans.fit(user_category_scaled)
+user_category_counts['cluster'] = kmeans.labels_
+
+# Extract cluster centers and interpret preferences
+cluster_centers = pd.DataFrame(scaler.inverse_transform(kmeans.cluster_centers_), 
+                               columns=user_category_counts.columns[:-1])
+
+# Save the cleaned output
+target_file = "user_clusters.csv"
+user_category_counts.to_csv(target_file, index=True)
+print(f"Clustering results saved to {target_file}")
+
+# Display cluster centers for analysis
+print("Cluster centers:")
+print(cluster_centers)
